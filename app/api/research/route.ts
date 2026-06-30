@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { WebSearchProvider } from "@/lib/research/websearch";
+import { getResearchProvider } from "@/lib/research";
 import { db } from "@/lib/db/client";
 import { searchRuns } from "@/lib/db/schema";
 
-const provider = new WebSearchProvider();
+const provider = getResearchProvider();
 
 export async function POST(req: NextRequest) {
   const { query, filters } = await req.json();
