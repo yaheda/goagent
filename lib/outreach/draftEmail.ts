@@ -1,5 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { Prospect } from "@/lib/db/schema";
+import { MODELS } from "@/lib/ai/models";
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
@@ -37,7 +38,7 @@ Outreach method: ${method}
       : `Write a short contact form message (under 200 words) to ${prospect.companyName} about cocoa product importing opportunities. No subject line needed.`;
 
   const response = await client.messages.create({
-    model: "claude-sonnet-4-6",
+    model: MODELS.drafting,
     max_tokens: 1024,
     messages: [
       {

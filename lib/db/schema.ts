@@ -20,6 +20,8 @@ export const prospects = pgTable("prospects", {
   matchScore: integer("match_score"),
   source: text("source"),
   status: text("status").notNull().default("discovered"),
+  emailSource: text("email_source"),
+  emailConfidence: text("email_confidence"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

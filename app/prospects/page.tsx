@@ -81,7 +81,23 @@ export default async function ProspectsPage() {
                   </TableCell>
                   <TableCell className="text-sm">
                     {p.contactEmail ? (
-                      <span className="text-green-700">✉ Email</span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-green-700">✉ Email</span>
+                        {p.emailConfidence && (
+                          <Badge
+                            variant="outline"
+                            className={
+                              p.emailConfidence === "high"
+                                ? "border-green-400 text-green-700 text-[10px] px-1 py-0"
+                                : p.emailConfidence === "medium"
+                                ? "border-amber-400 text-amber-700 text-[10px] px-1 py-0"
+                                : "border-gray-300 text-gray-500 text-[10px] px-1 py-0"
+                            }
+                          >
+                            {p.emailConfidence}
+                          </Badge>
+                        )}
+                      </div>
                     ) : p.linkedinUrl ? (
                       <span className="text-blue-700">in LinkedIn</span>
                     ) : p.contactFormUrl ? (

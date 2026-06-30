@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db/client";
 import { prospects } from "@/lib/db/schema";
-import { findEmailByDomain, extractDomain } from "@/lib/enrichment/hunter";
+import { runEnrichmentPipeline } from "@/lib/enrichment/enrichmentPipeline";
 import { desc } from "drizzle-orm";
 
 export async function GET() {
@@ -15,21 +15,24 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   const body = await req.json();
 
-  let contactEmail = body.contactEmail ?? null;
-  let contactName = body.contactName ?? null;
+  // Run the 5-step enrichment pipeline if no email already provided
+  let enrichment = {
+    contactEmail: body.contactEmail ?? null,
+    contactName: body.contactName ?? null,
+    contactFormUrl: body.contactFormUrl ?? null,
+    emailSource: null as string | null,
+    emailConfidence: null as string | null,
+  };
 
-  // Enrich with Hunter.io if no email and website is known
-  if (!contactEmail && body.websiteUrl) {
-    const domain = extractDomain(body.websiteUrl);
-    if (domain) {
-      const enriched = await findEmailByDomain(domain);
-      contactEmail = enriched.email;
-      if (!contactName && (enriched.firstName || enriched.lastName)) {
-        contactName = [enriched.firstName, enriched.lastName]
-          .filter(Boolean)
-          .join(" ");
-      }
-    }
+  if (!enrichment.contactEmail && body.websiteUrl) {
+    const result = await runEnrichmentPipeline(body.websiteUrl, body.contactName ?? null);
+    enrichment = {
+      contactEmail: result.contactEmail,
+      contactName: result.contactName ?? body.contactName ?? null,
+      contactFormUrl: result.contactFormUrl ?? body.contactFormUrl ?? null,
+      emailSource: result.emailSource,
+      emailConfidence: result.emailConfidence,
+    };
   }
 
   const [inserted] = await db
@@ -39,13 +42,15 @@ export async function POST(req: NextRequest) {
       country: body.country ?? null,
       productInterest: body.productInterest ?? [],
       websiteUrl: body.websiteUrl ?? null,
-      contactEmail,
-      contactName,
+      contactEmail: enrichment.contactEmail,
+      contactName: enrichment.contactName,
       linkedinUrl: body.linkedinUrl ?? null,
-      contactFormUrl: body.contactFormUrl ?? null,
+      contactFormUrl: enrichment.contactFormUrl,
       matchScore: body.matchScore ?? null,
       source: body.source ?? "web_search",
       status: "approved",
+      emailSource: enrichment.emailSource,
+      emailConfidence: enrichment.emailConfidence,
     })
     .returning();
 

@@ -63,7 +63,24 @@ export default async function ProspectDetailPage({
         {prospect.contactEmail && (
           <div>
             <p className="text-muted-foreground font-medium">Email</p>
-            <p>{prospect.contactEmail}</p>
+            <div className="flex items-center gap-2 mt-0.5">
+              <p>{prospect.contactEmail}</p>
+              {prospect.emailConfidence && (
+                <Badge
+                  variant="outline"
+                  className={
+                    prospect.emailConfidence === "high"
+                      ? "border-green-400 text-green-700 text-xs"
+                      : prospect.emailConfidence === "medium"
+                      ? "border-amber-400 text-amber-700 text-xs"
+                      : "border-gray-300 text-gray-500 text-xs"
+                  }
+                >
+                  {prospect.emailConfidence}
+                  {prospect.emailSource ? ` · ${prospect.emailSource.replace(/_/g, " ")}` : ""}
+                </Badge>
+              )}
+            </div>
           </div>
         )}
         {prospect.contactName && (

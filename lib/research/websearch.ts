@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { Message } from "@anthropic-ai/sdk/resources/messages";
 import type { ResearchProvider, Filters, CandidateProspect } from "./provider";
+import { MODELS } from "@/lib/ai/models";
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
@@ -33,7 +34,7 @@ export class WebSearchProvider implements ResearchProvider {
     const userMessage = `Research query: "${query}"\nFilters: ${filterDesc}\n\nFind 5-8 relevant import/export prospects. Return JSON array only.`;
 
     const response = (await client.messages.create({
-      model: "claude-sonnet-4-6",
+      model: MODELS.extraction,
       max_tokens: 4096,
       system: SYSTEM_PROMPT,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
